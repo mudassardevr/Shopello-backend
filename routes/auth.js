@@ -108,17 +108,44 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// GET LOGGED-IN USER
-router.get("/me", fetchuser, async (req, res) => {
+// // GET LOGGED-IN USER
+// router.get("/me", fetchuser, async (req, res) => {
+//   try {
+//     let user = await User.findById(req.user.id).select("-password");
+
+//     res.json({
+//       success: true,
+//       user,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: "Intervel Server Error" });
+//   }
+// });
+
+
+// ROUTE 3 : Get User Profile
+router.get("/profile", fetchuser, async (req, res) => {
   try {
-    let user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     res.json({
       success: true,
       user,
     });
   } catch (error) {
-    res.status(500).json({ error: "Intervel Server Error" });
+    console.error(error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 });
 
