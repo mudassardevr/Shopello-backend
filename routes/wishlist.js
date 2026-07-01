@@ -12,11 +12,8 @@ router.post("/add", fetchuser, async (req, res) => {
     console.log("req.user =", req.user);
   try {
 
-    console.log(req.body);////
 
     const { productId } = req.body;
-
-     console.log("productId =", productId);////
 
     const exist = await Wishlist.findOne({
       user: req.user.id,
