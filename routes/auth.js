@@ -59,7 +59,7 @@ router.post("/register", async (req, res) => {
       token,
     });
   } catch (error) {
-    consol.log(error.message);
+    console.error(error.message);
     res.status(500).json({ error: "Intervel Server Error" });
   }
 });
@@ -103,7 +103,7 @@ router.post("/login", async (req, res) => {
       token,
     });
   } catch (error) {
-    consol.log(error.message);
+    console.error(error.message);
     res.status(500).json({ error: "Intervel Server Error" });
   }
 });
