@@ -12,18 +12,24 @@ router.post("/register", async (req, res) => {
 
     // VALIDATION
     if (!name || !email || !password || !confirmPassword) {
-      return res.status(400).json({ error: "All field require" });
+      return res.status(400).json({ 
+        success:false,
+        message : "All field require" });
     }
 
     // check password matched with confirmPassword
     if (password != confirmPassword) {
-      return res.status(400).json({ error: "Password do not match" });
+      return res.status(400).json({
+        success: false,
+        message: "Password do not match" });
     }
 
     // checking if user exists
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ error: "user already exist" });
+      return res.status(400).json({ 
+        success:false,
+        message: "Email is already registered" });
     }
 
     //HASH PASSWORD
@@ -37,8 +43,6 @@ router.post("/register", async (req, res) => {
       password: hashPassword,
     });
 
-    console.log("User document:", user);
-
     // jwt payload
     const payload = {
       user: {
@@ -46,7 +50,6 @@ router.post("/register", async (req, res) => {
       },
     };
 
-    console.log("Payload:", payload);
 
     // generating token
     const token = jwt.sign(payload, process.env.JWT_SECRET);
@@ -54,9 +57,16 @@ router.post("/register", async (req, res) => {
     console.log("Token:", token);
 
     //success token
-    res.json({
+    res.status(201).json({
       success: true,
+      message: "Account created Successfully",
       token,
+       user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      },
     });
   } catch (error) {
     console.error(error.message);
@@ -71,19 +81,26 @@ router.post("/login", async (req, res) => {
 
     //Validation
     if (!email || !password) {
-      return res.status(400).json({ error: "All Fields required " });
+      return res.status(400).json({
+        success : false,
+        message : "Email and Password Required"
+      });
     }
 
     //checking user is there or not if not there show error
     let user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: "Invalid User Not Available" });
+      return res.status(400).json({ 
+        success: false,
+        message: "No account found with this email." });
     }
 
     //checking password match with userpassword
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ error: "Invalid Credentails" });
+      return res.status(400).json({ 
+        success: false,
+        message: "Incorrect Password" });
     }
 
     //payload
@@ -98,29 +115,24 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET , {expiresIn : "7d"});
 
     //success
-    res.json({
+    res.status(200).json({
       success: true,
+      message: "Welcome Back",
       token,
+      user:{
+        id:user.id,
+        name:user.name,
+        email:user.email,
+        isAdmin:user.isAdmin
+      }
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Intervel Server Error" });
+    console.error(error);
+    res.status(500).json({ 
+      success:false,
+      message: "Intervel Server Error" });
   }
 });
-
-// // GET LOGGED-IN USER
-// router.get("/me", fetchuser, async (req, res) => {
-//   try {
-//     let user = await User.findById(req.user.id).select("-password");
-
-//     res.json({
-//       success: true,
-//       user,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: "Intervel Server Error" });
-//   }
-// });
 
 
 // ROUTE 3 : Get User Profile
